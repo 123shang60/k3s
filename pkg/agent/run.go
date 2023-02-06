@@ -219,9 +219,24 @@ func Run(ctx context.Context, cfg cmds.Agent) error {
 }
 
 func validate() error {
-	cgroups, err := ioutil.ReadFile("/proc/self/cgroup")
-	if err != nil {
-		return err
+	isCgroupV2 := false
+	_, err := os.Stat("/sys/fs/cgroup/cgroup.controllers")
+	if err == nil {
+		isCgroupV2 = true
+	}
+
+	var cgroups []byte
+
+	if isCgroupV2 {
+		cgroups, err = ioutil.ReadFile("/sys/fs/cgroup/cgroup.controllers")
+		if err != nil {
+			return err
+		}
+	} else {
+		cgroups, err = ioutil.ReadFile("/proc/self/cgroup")
+		if err != nil {
+			return err
+		}
 	}
 
 	if !strings.Contains(string(cgroups), "cpuset") {
