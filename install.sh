@@ -610,6 +610,8 @@ ip link delete cni0
 ip link delete flannel.1
 rm -rf /var/lib/cni/
 iptables-save | grep -v KUBE- | grep -v CNI- | iptables-restore
+docker ps | grep -v CONTAINER | awk '{print $1}'| xargs docker stop
+docker ps -a | grep -v CONTAINER  |awk '{print $1}'|xargs docker rm
 EOF
     $SUDO chmod 755 ${KILLALL_K3S_SH}
     $SUDO chown root:root ${KILLALL_K3S_SH}
